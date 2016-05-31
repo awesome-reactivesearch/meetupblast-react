@@ -11,7 +11,7 @@ var FilterContainer = React.createClass({
         var stream_on = REQUEST.FIRE_FILTER(this.props.CITY_LIST, this.props.TOPIC_LIST);
         stream_on.on('data', function(res) {
             $this.props.on_get_data(res);
-            // $this.stream_start();
+            $this.stream_start();
         }).on('error', function(err) {});
     },
     stream_start: function() {

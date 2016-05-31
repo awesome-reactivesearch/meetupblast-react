@@ -26,6 +26,7 @@
   "homepage": "https://github.com/appbaseio/meetupblast#readme",
   "dependencies": {
     "browserify": "^13.0.1",
-    "reactify": "^1.1.1"
+    "reactify": "^1.1.1",
+    "vinyl-source-stream": "^1.1.0"
   }
 }

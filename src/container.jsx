@@ -8,9 +8,6 @@ var Container = React.createClass({
             users: []
         };
     },
-    componentWillMount: function() {
-        this.fire_response();
-    },
     componentDidMount: function() {
         var $this = this;
         this.make_responsive();
@@ -32,23 +29,6 @@ var Container = React.createClass({
         $(window).resize(function() {
             size_set();
         });
-    },
-    fire_response: function() {
-        var $this = this;
-        streamingClient = REQUEST.GET_STREAMING_CLIENT();
-        var stream_on = REQUEST.FIRE_FILTER();
-        stream_on.on('data', function(res) {
-            $this.on_get_data(res);
-            $this.stream_start();
-        }).on('error', function(err) {});
-    },
-    stream_start: function() {
-        var $this = this;
-        streamingClient = REQUEST.GET_STREAMING_CLIENT();
-        var stream_on = REQUEST.STREAM_START();
-        stream_on.on('data', function(res) {
-            $this.on_get_data(res, true);
-        }).on('error', function(err) {});
     },
     on_get_data: function(res, append) {
         var $this = this;
@@ -79,7 +59,7 @@ var Container = React.createClass({
         var $this = this;
         return (
                 <div className="row meetup-container">
-                    <FilterContainer key='1' fire_response={this.fire_response}></FilterContainer>
+                    <FilterContainer key='1' on_get_data={this.on_get_data}></FilterContainer>
                     <div className="meetup-record-holder" id="meetup-record-holder">
                         <div className="container full_row" id="record-container">
                             {this.state.users.map(function(single_user1, i){

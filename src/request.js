@@ -173,5 +173,15 @@ meetup_request.prototype = {
       contentType: "application/json",
       data: request_data
     });
+  },
+  // get list of city or topic
+  GET_TAG_LIST: function(method, callback) {
+    var request_data = this.FILTER_PAYLOAD(method);
+    this.GET_STREAMING_CLIENT().search({
+        type: 'meetup',
+        body: request_data
+    }).on('data', function(res) {
+       callback(res);
+    });
   }
 }

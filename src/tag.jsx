@@ -78,24 +78,13 @@ var Tag = React.createClass({
     componentWillMount: function() {
         var $this = this;
         var method = this.props.type;
-        var request_data = JSON.stringify(REQUEST.FILTER_PAYLOAD(method));
-        jQuery.ajax({
-            type: "POST",
-            beforeSend: function(request) {
-                request.setRequestHeader("Authorization", "Basic " + btoa(REQUEST.USERNAME + ":" + REQUEST.PASSWORD));
-            },
-            'url': REQUEST.FILTER_URL,
-            dataType: 'json',
-            contentType: "application/json",
-            data: request_data,
-            success: function(full_data) {
-                var city_list = [];
-                var cities = full_data.aggregations.city.buckets;
-                $.each(cities, function(i, city) {
-                    city_list.push(city.key);
-                });
-                $this.set_filter_list(method, city_list);
-            }
+        REQUEST.GET_TAG_LIST(method, function(full_data) {
+            var city_list = [];
+            var cities = full_data.aggregations.city.buckets;
+            $.each(cities, function(i, city) {
+                city_list.push(city.key);
+            });
+            $this.set_filter_list(method, city_list);
         });
     },
     render: function() {

@@ -7,8 +7,6 @@ function meetup_request(meetup_variable) {
   this.APPNAME = 'meetup2';
 
   this.SINGLE_RECORD_ClONE = $(".single_record_for_clone").clone();
-  this.CITY_LIST = [];
-  this.TOPIC_LIST = [];
   this.FROM = 0;
   this.PAGE_SIZE = 25;
 }
@@ -98,26 +96,26 @@ meetup_request.prototype = {
     return streamingClient;
   },
   //Create the payload on the basis of selected city, topics
-  GET_PAYLOAD: function() {
+  GET_PAYLOAD: function(CITY_LIST, TOPIC_LIST) {
     var $this = this;
-    if ($this.CITY_LIST.length || $this.TOPIC_LIST.length) {
+    if (CITY_LIST.length || TOPIC_LIST.length) {
       var search_payload = $this.SEARCH_PAYLOAD('filter');
-      if ($this.CITY_LIST.length) {
+      if (CITY_LIST.length) {
         search_payload['body']['query']['filtered']['filter']['and'][0] = {
           'terms': {
-            "group_city_simple": $this.CITY_LIST
+            "group_city_simple": CITY_LIST
           }
         };
       }
 
-      if ($this.TOPIC_LIST.length) {
-        if ($this.CITY_LIST.length)
+      if (TOPIC_LIST.length) {
+        if (CITY_LIST.length)
           var ar_index = 1
         else
           var ar_index = 0;
         search_payload['body']['query']['filtered']['filter']['and'][ar_index] = {
           'terms': {
-            "topic_name_simple": $this.TOPIC_LIST
+            "topic_name_simple": TOPIC_LIST
           }
         };
       }
@@ -127,11 +125,11 @@ meetup_request.prototype = {
     return search_payload;
   },
   //Start and stop stream whenever selecting/canceling city/topic and also start initially in app.js
-  FIRE_FILTER: function() {
+  FIRE_FILTER: function(CITY_LIST, TOPIC_LIST) {
     var $this = this;
     $this.FROM = 0;
     var streaming = this.GET_STREAMING_CLIENT();
-    var search_payload = this.GET_PAYLOAD();
+    var search_payload = this.GET_PAYLOAD(CITY_LIST, TOPIC_LIST);
     delete search_payload.stream;
     return streaming.search(search_payload);
 
@@ -142,10 +140,10 @@ meetup_request.prototype = {
     console.log(search_payload);
   },
   //Start stream
-  STREAM_START: function() {
+  STREAM_START: function(CITY_LIST, TOPIC_LIST) {
     var $this = this;
     var streaming = this.GET_STREAMING_CLIENT();
-    var search_payload = this.GET_PAYLOAD();
+    var search_payload = this.GET_PAYLOAD(CITY_LIST, TOPIC_LIST);
     delete search_payload.size;
     if (typeof responseStream !== 'undefined')
       responseStream.stop();
@@ -153,10 +151,10 @@ meetup_request.prototype = {
   },
 
   //whenever user reaches at the bottom fire this function - used in app.js
-  PAGINATION: function() {
+  PAGINATION: function(CITY_LIST, TOPIC_LIST) {
     var $this = this;
     $this.FROM += $this.PAGE_SIZE;
-    var search_payload = this.GET_PAYLOAD();
+    var search_payload = this.GET_PAYLOAD(CITY_LIST, TOPIC_LIST);
     delete search_payload.stream;
     var search_payload_pagination = search_payload['body'];
     search_payload_pagination['size'] = $this.PAGE_SIZE;

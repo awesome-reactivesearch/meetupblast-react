@@ -5,7 +5,9 @@ var User = require('./User.jsx');
 var Container = React.createClass({
     getInitialState: function() {
         return {
-            users: []
+            users: [],
+            CITY_LIST: [],
+            TOPIC_LIST: []
         };
     },
     componentDidMount: function() {
@@ -13,7 +15,7 @@ var Container = React.createClass({
         this.make_responsive();
         $('.meetup-record-holder').on('scroll', function() {
             if ($(this).scrollTop() + $(this).innerHeight() >= this.scrollHeight) {
-                var stream_on = REQUEST.PAGINATION();
+                var stream_on = REQUEST.PAGINATION($this.state.CITY_LIST, $this.state.TOPIC_LIST);
                 stream_on.done(function(res) {
                     $this.on_get_data(res, true);
                 }).fail('error', function(err) {});
@@ -55,11 +57,29 @@ var Container = React.createClass({
             });
         }
     },
+    set_list: function(method, list) {
+        if(method == 'city') {
+            this.setState({
+                CITY_LIST: list
+            });
+        }
+        else {
+            this.setState({
+                TOPIC_LIST: list
+            });   
+        }
+    },
     render: function() {
         var $this = this;
         return (
                 <div className="row meetup-container">
-                    <FilterContainer key='1' on_get_data={this.on_get_data}></FilterContainer>
+                    <FilterContainer key='1' 
+                        on_get_data={this.on_get_data}
+                        CITY_LIST={this.state.CITY_LIST}
+                        TOPIC_LIST={this.state.TOPIC_LIST}
+                        set_list={this.set_list}
+                        >
+                    </FilterContainer>
                     <div className="meetup-record-holder" id="meetup-record-holder">
                         <div className="container full_row" id="record-container">
                             {this.state.users.map(function(single_user1, i){
@@ -74,6 +94,7 @@ var Container = React.createClass({
                                         group_city={single_user.group.group_city}
                                         group_topics={single_user.group.group_topics}
                                         event_url={single_user.event.event_url}
+                                        TOPIC_LIST={$this.state.TOPIC_LIST}
                                      ></User>
                                 );
                             })}

@@ -7,7 +7,7 @@ var User = React.createClass({
     HIGHLIGHT_TAGS: function(group_topics) {
         var highlight_tags = [];
         var group_topics = group_topics;
-        var highlight = REQUEST.TOPIC_LIST;
+        var highlight = this.props.TOPIC_LIST;
 
         if (highlight.length) {
             for (i = 0; i < group_topics.length; i++) {

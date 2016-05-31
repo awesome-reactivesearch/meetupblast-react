@@ -19,21 +19,21 @@ var Tag = React.createClass({
                 var val = $(this).attr('val');
                 $(single_tag).remove();
                 list.remove(val);
-                $this.props.fire_response();
+                $this.props.set_list(type, list);
                 container.find('.tag_checkbox[value="' + val + '"]').prop('checked', false);
             });
             container.find('.tag_name').append(single_tag);
-            $this.props.fire_response();
+            $this.props.set_list(type, list);
         } else {
             container.find('.single_tag[val="' + checkbox_val + '"]').remove();
             list.remove(check2);
-            $this.props.fire_response();
+            $this.props.set_list(type, list);
         }
     },
     //create city or topic list items
     CREATE_TAG: function(type, data) {
         $this = this;
-        var list = type == 'city' ? REQUEST.CITY_LIST : REQUEST.TOPIC_LIST;
+        var list = this.props.list;
         var container = $('.' + type + '_container');
         var checkbox = $('<input>').attr({
             type: 'checkbox',

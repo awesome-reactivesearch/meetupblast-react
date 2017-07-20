@@ -29,10 +29,6 @@ var FilterContainer = React.createClass({
     render: function() {
         return (
                 <div className="meetup-filter-container">
-                    <Tag key="0" type="city"
-                        set_list={this.set_list}
-                        list={this.props.CITY_LIST}
-                        fire_response={this.fire_response}></Tag>
                     <Tag key="1" type="topic"
                         set_list={this.set_list}
                         list={this.props.TOPIC_LIST}

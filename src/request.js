@@ -21,7 +21,7 @@ meetup_request.prototype = {
       "query": {
         "range": {
           "mtime": {
-            "gte": "now-15d"
+            "gte": new Date().setMonth(new Date().getMonth()-1)
           }
         }
       },

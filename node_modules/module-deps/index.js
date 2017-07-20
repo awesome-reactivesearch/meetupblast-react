@@ -1,5 +1,6 @@
 var fs = require('fs');
 var path = require('path');
+var relativePath = require('cached-path-relative')
 
 var browserResolve = require('browser-resolve');
 var nodeResolve = require('resolve');
@@ -26,6 +27,11 @@ function Deps (opts) {
     if (!opts) opts = {};
     
     this.basedir = opts.basedir || process.cwd();
+    this.persistentCache = opts.persistentCache || function (file, id, pkg, fallback, cb) {
+        process.nextTick(function () {
+            fallback(null, cb);
+        });
+    };
     this.cache = opts.cache;
     this.fileCache = opts.fileCache;
     this.pkgCache = opts.packageCache || {};
@@ -71,11 +77,11 @@ function Deps (opts) {
 
 Deps.prototype._isTopLevel = function (file) {
     var isTopLevel = this.entries.some(function (main) {
-        var m = path.relative(path.dirname(main), file);
+        var m = relativePath(path.dirname(main), file);
         return m.split(/[\\\/]/).indexOf('node_modules') < 0;
     });
     if (!isTopLevel) {
-        var m = path.relative(this.basedir, file);
+        var m = relativePath(this.basedir, file);
         isTopLevel = m.split(/[\\\/]/).indexOf('node_modules') < 0;
     }
     return isTopLevel;
@@ -134,7 +140,7 @@ Deps.prototype._flush = function () {
     Object.keys(files).forEach(function (key) {
         var r = files[key];
         var pkg = r.pkg || {};
-        var dir = path.dirname(r.row.file);
+        var dir = r.row.file ? path.dirname(r.row.file) : self.basedir;
         if (!pkg.__dirname) pkg.__dirname = dir;
         self.walk(r.row, xtend(self.top, {
             filename: path.join(dir, '_fake.js')
@@ -195,10 +201,7 @@ Deps.prototype.resolve = function (id, parent, cb) {
 Deps.prototype.readFile = function (file, id, pkg) {
     var self = this;
     if (xhas(this.fileCache, file)) {
-        var tr = through();
-        tr.push(this.fileCache[file]);
-        tr.push(null);
-        return tr;
+        return toStream(this.fileCache[file]);
     }
     var rs = fs.createReadStream(file, {
         encoding: 'utf8'
@@ -375,19 +378,44 @@ Deps.prototype.walk = function (id, parent, cb) {
         var c = self.cache && self.cache[file];
         if (c) return fromDeps(file, c.source, c.package, fakePath, Object.keys(c.deps));
         
-        self.readFile(file, id, pkg)
-            .pipe(self.getTransforms(fakePath || file, pkg, {
-                builtin: builtin,
-                inNodeModules: parent.inNodeModules
-            }))
-            .pipe(concat(function (body) {
-                fromSource(file, body.toString('utf8'), pkg, fakePath);
-            }))
-        ;
+        self.persistentCache(file, id, pkg, persistentCacheFallback, function (err, c) {
+            if (err) {
+                self.emit('error', err);
+                return;
+            }
+            fromDeps(file, c.source, c.package, fakePath, Object.keys(c.deps));
+        });
+
+        function persistentCacheFallback (dataAsString, cb) {
+            var stream = dataAsString ? toStream(dataAsString) : self.readFile(file, id, pkg);
+            stream
+                .pipe(self.getTransforms(fakePath || file, pkg, {
+                    builtin: builtin,
+                    inNodeModules: parent.inNodeModules
+                }))
+                .pipe(concat(function (body) {
+                    var src = body.toString('utf8');
+                    var deps = getDeps(file, src);
+                    if (deps) {
+                        cb(null, {
+                            source: src,
+                            package: pkg,
+                            deps: deps.reduce(function (deps, dep) {
+                                deps[dep] = true;
+                                return deps;
+                            }, {})
+                        });
+                    }
+                }));
+        }
     });
 
+    function getDeps (file, src) {
+        return rec.noparse ? [] : self.parseDeps(file, src);
+    }
+
     function fromSource (file, src, pkg, fakePath) {
-        var deps = rec.noparse ? [] : self.parseDeps(file, src);
+        var deps = getDeps(file, src);
         if (deps) fromDeps(file, src, pkg, fakePath, deps);
     }
     
@@ -465,7 +493,7 @@ Deps.prototype.lookupPackage = function (file, cb) {
     if (cached) return nextTick(cb, null, cached);
     if (cached === false) return nextTick(cb, null, undefined);
     
-    var dirs = parents(path.dirname(file));
+    var dirs = parents(file ? path.dirname(file) : self.basedir);
     
     (function next () {
         if (dirs.length === 0) {
@@ -547,6 +575,13 @@ function xhas (obj) {
         obj = obj[key];
     }
     return true;
+}
+
+function toStream (dataAsString) {
+    var tr = through();
+    tr.push(dataAsString);
+    tr.push(null);
+    return tr;
 }
 
 function has (obj, key) {

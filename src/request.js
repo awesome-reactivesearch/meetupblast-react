@@ -21,7 +21,7 @@ meetup_request.prototype = {
       "query": {
         "range": {
           "mtime": {
-            "gte": "now-1m"
+            "gte": "now-15d"
           }
         }
       },

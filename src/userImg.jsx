@@ -6,9 +6,14 @@ var UserImg = React.createClass({
             src: this.props.src
         };
     },
+    resetImage: function() {
+        this.setState({
+            src: 'http://www.avidog.com/wp-content/uploads/2015/01/BellaHead082712_11-50x65.jpg'
+        });
+    },
     render: function() {
         return <img 
-            onError={() => this.setState({src: 'http://www.avidog.com/wp-content/uploads/2015/01/BellaHead082712_11-50x65.jpg'})}
+            onError={this.resetImage}
             src={this.state.src}
         />
     }

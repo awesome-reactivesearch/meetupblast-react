@@ -1,19 +1,24 @@
-var through2 = require('through2')
+import Stream from "stream";
 
-var getTypesService = function getTypesService(client) {
-	var resultStream = through2.obj(function(chunk, enc, callback) {
-		var appname = Object.keys(chunk)[0]
-		var types = Object.keys(chunk[appname]['mappings']).filter(type => type !== '_default_')
-		this.push(types)
+const getTypesService = function getTypesService(client) {
+	const stream = new Stream();
 
-		callback()
+	client.performFetchRequest({
+		method: "GET",
+		path: "_mapping"
 	})
-	resultStream.writable = false
+	.on("data", (data) => {
+		const types = Object.keys(data[client.appname]["mappings"]).filter(type => type !== "_default_");
+		stream.emit("data", types);
+	})
+	.on("error", (error) => {
+		stream.emit("error", error);
+	})
+	.on("end", () => {
+		stream.emit("end");
+	})
 
-	return client.performStreamingRequest({
-		method: 'GET',
-		path: '_mapping'
-	}).pipe(resultStream)
-}
+	return stream;
+};
 
-module.exports = getTypesService
+export default getTypesService;

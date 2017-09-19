@@ -1,32 +1,32 @@
-var helpers = require('../helpers')
+import { validate } from "../helpers";
 
-var bulkService = function bulkService(client, args) {
-	var valid = helpers.validate(args, {
-		'body': 'object'
-	})
+const bulkService = function bulkService(client, args) {
+	const valid = validate(args, {
+		"body": "object"
+	});
 	if(valid !== true) {
 		throw valid
 		return
 	}
-	var type = args.type
-	var body = args.body
+	const type = args.type;
+	const body = args.body;
 	delete args.type
 	delete args.body
 
-	var path
+	let path;
 	if(type) {
-		path = type + '/_bulk'
+		path = `${type}/_bulk`
 	} else {
-		path = '/_bulk'
+		path = "/_bulk"
 	}
 
-	return client.performStreamingRequest({
-		method: 'POST',
-		path: path,
+	return client.performFetchRequest({
+		method: "POST",
+		path,
 		params: args,
-		body: body
+		body
 	})
-}
+};
 
 
-module.exports = bulkService
+export default bulkService;

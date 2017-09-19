@@ -1,27 +1,27 @@
-var helpers = require('../helpers')
+import { validate } from "../helpers";
 
-var deleteService = function deleteService(client, args) {
-	var valid = helpers.validate(args, {
-		'type': 'string',
-		'id': 'string'
-	})
+const deleteService = function deleteService(client, args) {
+	const valid = validate(args, {
+		"type": "string",
+		"id": "string"
+	});
 	if(valid !== true) {
 		throw valid
 		return
 	}
-	var type = args.type
-	var id = args.id
+	const type = args.type;
+	const id = args.id;
 	delete args.type
 	delete args.id
 
-	var path = type + '/' + id
+	const path = `${type}/${id}`;
 
-	return client.performStreamingRequest({
-		method: 'DELETE',
-		path: path,
+	return client.performFetchRequest({
+		method: "DELETE",
+		path,
 		params: args
 	})
-}
+};
 
 
-module.exports = deleteService
+export default deleteService;

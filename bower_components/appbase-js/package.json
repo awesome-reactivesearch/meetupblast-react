@@ -1,10 +1,12 @@
 {
 	"name": "appbase-js",
-	"version": "0.10.7",
+	"version": "1.0.0-alpha",
 	"description": "Appbase.io streaming client lib for Javascript",
-	"main": "dist/appbase.js",
+	"main": "lib/index.js",
 	"scripts": {
-		"test": "echo \"Error: no test specified\" && exit 1"
+		"build": "webpack -p",
+		"build:lib": "babel src --out-dir lib",
+		"test": "grunt test"
 	},
 	"keywords": [
 		"appbase",
@@ -13,22 +15,36 @@
 		"search"
 	],
 	"author": "Sacheendra Talluri",
-	"license": "ISC",
+	"license": "MIT",
 	"dependencies": {
-		"JSONStream": "^1.0.4",
+		"es6-promise": "^4.1.1",
+		"eventemitter2": "^4.1.2",
+		"fetch-everywhere": "^1.0.5",
 		"guid": "0.0.12",
-		"hyperquest": "^1.2.0",
-		"murmur": "0.0.2",
+		"json-stable-stringify": "^1.0.1",
+		"json-stream": "^1.0.0",
+		"stream": "^0.0.2",
 		"through2": "^2.0.0",
-		"ws": "^0.8.0"
+		"url": "^0.11.0",
+		"ws": "^2.2.0"
 	},
 	"devDependencies": {
+		"babel-core": "^6.26.0",
+		"babel-loader": "^7.1.2",
+		"babel-plugin-add-module-exports": "^0.2.1",
+		"babel-preset-es2015": "^6.24.1",
 		"grunt": "^0.4.5",
 		"grunt-babel": "^5.0.3",
 		"grunt-browserify": "^3.8.0",
 		"grunt-contrib-uglify": "^0.9.1",
 		"grunt-contrib-watch": "^0.6.1",
 		"grunt-mocha-test": "^0.12.7",
-		"mocha": "^2.2.5"
+		"json-loader": "^0.5.7",
+		"mocha": "^2.2.5",
+		"node-noop": "^1.0.0",
+		"webpack": "^3.6.0"
+	},
+	"browser": {
+		"ws": "./src/ws-shim.js"
 	}
 }

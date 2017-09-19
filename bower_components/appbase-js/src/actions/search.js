@@ -1,38 +1,38 @@
-var helpers = require('../helpers')
+import { validate } from "../helpers";
 
-var searchService = function searchService(client, args) {
-	var valid = helpers.validate(args, {
-		'body': 'object'
-	})
+const searchService = function searchService(client, args) {
+	const valid = validate(args, {
+		"body": "object"
+	});
 	if(valid !== true) {
 		throw valid
 		return
 	}
 
-	var type
+	let type;
 	if(args.type.constructor === Array) {
 		type = args.type.join()
 	} else {
 		type = args.type
 	}
 
-	var body = args.body
+	const body = args.body;
 	delete args.type
 	delete args.body
 
-	var path
+	let path;
 	if(type) {
-		path = type + '/_search'
+		path = `${type}/_search`
 	} else {
-		path = '/_search'
+		path = "/_search"
 	}
 
-	return client.performStreamingRequest({
-		method: 'POST',
-		path: path,
+	return client.performFetchRequest({
+		method: "POST",
+		path,
 		params: args,
-		body: body
+		body
 	})
-}
+};
 
-module.exports = searchService
+export default searchService;

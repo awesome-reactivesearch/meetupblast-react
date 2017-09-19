@@ -1,34 +1,34 @@
-var helpers = require('../helpers')
+import { validate } from "../helpers";
 
-var indexService = function indexService(client, args) {
-	var valid = helpers.validate(args, {
-		'type': 'string',
-		'body': 'object'
-	})
+const indexService = function indexService(client, args) {
+	const valid = validate(args, {
+		"type": "string",
+		"body": "object"
+	});
 	if(valid !== true) {
 		throw valid
 		return
 	}
-	var type = args.type
-	var id = args.id
-	var body = args.body
+	const type = args.type;
+	const id = args.id;
+	const body = args.body;
 	delete args.type
 	delete args.id
 	delete args.body
 
-	var path
+	let path;
 	if(id) {
-		path = type + '/' + id
+		path = `${type}/${id}`
 	} else {
 		path = type
 	}
 
-	return client.performStreamingRequest({
-		method: 'POST',
-		path: path,
+	return client.performFetchRequest({
+		method: "POST",
+		path,
 		params: args,
-		body: body
+		body
 	})
-}
+};
 
-module.exports = indexService
+export default indexService;

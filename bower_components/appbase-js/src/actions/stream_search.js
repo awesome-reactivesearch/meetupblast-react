@@ -1,16 +1,16 @@
-var helpers = require('../helpers')
+import { validate } from "../helpers";
 
-var streamSearchService = function streamSearchService(client, args) {
-	var valid = helpers.validate(args, {
-		'body': 'object'
-	})
+const streamSearchService = function streamSearchService(client, args) {
+	const valid = validate(args, {
+		"body": "object"
+	});
 	if(valid !== true) {
 		throw valid
 		return
 	}
 
-	if(args.type === undefined || !(typeof args.type === 'string' || args.type.constructor === Array)
-		|| (args.type === '' || args.type.length === 0) ) {
+	if(args.type === undefined || !(typeof args.type === "string" || args.type.constructor === Array)
+		|| (args.type === "" || args.type.length === 0) ) {
 		throw new Error("fields missing: type")
 		return
 	}
@@ -23,19 +23,19 @@ var streamSearchService = function streamSearchService(client, args) {
 	}
 
 	var type = args.type
-	var body = args.body
+	const body = args.body;
 	delete args.type
 	delete args.body
 	delete args.stream
 
-	args.streamonly = 'true'
+	args.streamonly = "true"
 
 	return client.performWsRequest({
-		method: 'POST',
-		path: type + '/_search',
+		method: "POST",
+		path: `${type}/_search`,
 		params: args,
-		body: body
+		body
 	})
-}
+};
 
-module.exports = streamSearchService
+export default streamSearchService;
